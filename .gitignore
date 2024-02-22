@@ -1,0 +1,5 @@
+.venv/
+.idea/
+*.pyc
+forum/static/
+forum/uploads/
