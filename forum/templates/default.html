@@ -4,7 +4,13 @@
     <meta charset="UTF-8">
     <title>{% block title %}{% endblock title %}</title>
 </head>
-<body>
+<body bgcolor="#c0c0c0">
+    <div class="topnav">
+        <a href="{% url 'main_page' %}">Home</a>
+        <a href="#news">News</a>
+    </div>
+    {% block navigation %}
+    {% endblock navigation %}
     {% block content %}
     {% endblock content %}
 </body>

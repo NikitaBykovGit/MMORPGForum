@@ -6,4 +6,5 @@ class PostList(ListView):
     model = Post
     ordering = 'time'
     template_name = 'billboard/posts.html'
-    context_object_name = 'Posts'
+    context_object_name = 'posts'
+    paginate_by = 10
