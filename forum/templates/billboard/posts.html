@@ -4,13 +4,14 @@
 {% block title %} Billboard {% endblock title %}
 
 {% block content %}
-    <table width="800">
+    <table width="1000">
     <tr>
         <td>Title</td>
         <td>Content</td>
         <td>Category</td>
         <td>Time</td>
         <td>Author</td>
+        <td>Action</td>
     </tr>
     {% for post in posts %}
         <tr>
@@ -19,6 +20,7 @@
             <td>{{ post.category }}</td>
             <td>{{ post.time|date:"d-m-Y" }}</td>
             <td>{{ post.author }}</td>
+            <td><a href="{% url 'response' post.id %}">Response</a></td>
         </tr>
     {% endfor %}
     </table>
