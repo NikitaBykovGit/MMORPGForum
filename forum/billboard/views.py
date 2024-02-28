@@ -1,3 +1,4 @@
+from django.db.models import Value, F, OuterRef, Subquery
 from django.http import HttpResponseRedirect
 from django.urls import reverse_lazy, reverse
 from django.views.generic import View, DetailView, ListView, CreateView, UpdateView, DeleteView
@@ -18,6 +19,15 @@ class PostList(ListView):
     template_name = 'billboard/posts.html'
     context_object_name = 'posts'
     paginate_by = 10
+    
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        responce = Response.objects.get(post_id=OuterRef('id'), user_id=self.request.user.id)
+        queryset = queryset.annotate(response_exists=Subquery(responce.values(F('id'))))
+        print(self.request.user.id)
+        print(queryset[1].response_exists)
+        print(queryset[1].id)
+        return queryset
 
 
 class PostCreate(CreateView):
@@ -54,9 +64,8 @@ class ResponseUpdate(UpdateView):
     model = Response
     template_name = 'billboard/post_edit.html'
 
-    def get_queryset(self):
-        print(self.kwargs)
-        return super().queryset()
+    def get_object(self, queryset=None):
+        return Response.objects.get(post_id=self.kwargs['pk'], user_id=self.request.user.id)
 
 
 class PostDelete(DeleteView):
