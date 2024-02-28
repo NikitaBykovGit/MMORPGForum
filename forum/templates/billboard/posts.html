@@ -11,7 +11,7 @@
         <td>Category</td>
         <td>Time</td>
         <td>Author</td>
-        <td>Action</td>
+        <td>Response</td>
     </tr>
     {% for post in posts %}
         <tr>
@@ -20,7 +20,7 @@
             <td>{{ post.category }}</td>
             <td>{{ post.time|date:"d-m-Y" }}</td>
             <td>{{ post.author }}</td>
-            <td><a href="{% url 'response' post.id %}">Response</a></td>
+            <td><a href="{% url 'response' post.id %}">Add</a></td>
         </tr>
     {% endfor %}
     </table>

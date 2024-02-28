@@ -21,9 +21,9 @@ class Category(models.Model):
     name = models.CharField(max_length=2, choices=CATEGORY, unique=True, default='TK')
 
     def __str__(self):
-        for cat in self.CATEGORY:
-            if cat[0] == self.name:
-                return cat[1]
+        for category in self.CATEGORY:
+            if category[0] == self.name:
+                return category[1]
 
 
 class Post(models.Model):
@@ -37,7 +37,7 @@ class Post(models.Model):
         return self.title
 
     def get_absolute_url(self):
-        return reverse('product_detail', args=[str(self.id)])
+        return reverse('post_detail', args=[str(self.id)])
 
 
 class Response(models.Model):
@@ -50,3 +50,6 @@ class Response(models.Model):
         constraints = [
             models.UniqueConstraint(fields=['user', 'post'], name='unique response to a post from each user')
         ]
+
+    def get_absolute_url(self):
+        return reverse('main_page')

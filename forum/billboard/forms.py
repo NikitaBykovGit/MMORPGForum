@@ -1,6 +1,6 @@
 from ckeditor_uploader.widgets import CKEditorUploadingWidget
 from django import forms
-from .models import Post
+from .models import Post, Response
 
 
 class PostAdminForm(forms.ModelForm):
@@ -17,5 +17,13 @@ class PostForm(forms.ModelForm):
         fields = [
             'category',
             'title',
+            'content',
+        ]
+
+
+class ResponseForm(forms.ModelForm):
+    class Meta:
+        model = Response
+        fields = [
             'content',
         ]
