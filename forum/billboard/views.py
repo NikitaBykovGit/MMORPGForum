@@ -1,10 +1,18 @@
-from django.db.models import Value, F, OuterRef, Subquery
-from django.http import HttpResponseRedirect
-from django.urls import reverse_lazy, reverse
-from django.views.generic import View, DetailView, ListView, CreateView, UpdateView, DeleteView
+from abc import ABC
 
-from .forms import PostForm, ResponseForm
+from django.contrib.auth.models import User
+from django.db.models import OuterRef, Subquery, Count
+from django.urls import reverse_lazy
+from django.views.generic import DetailView, ListView, CreateView, UpdateView, DeleteView
+
 from .models import Post, Response
+from .forms import PostForm, ResponseForm
+from .filters import PostFilter
+
+
+class FindResponseMixin(ABC):
+    def get_object(self, queryset=None):
+        return Response.objects.get(post_id=self.kwargs['pk'], user_id=self.request.user.id)
 
 
 class PostDetail(DetailView):
@@ -19,15 +27,18 @@ class PostList(ListView):
     template_name = 'billboard/posts.html'
     context_object_name = 'posts'
     paginate_by = 10
-    
+
     def get_queryset(self):
         queryset = super().get_queryset()
-        responce = Response.objects.get(post_id=OuterRef('id'), user_id=self.request.user.id)
-        queryset = queryset.annotate(response_exists=Subquery(responce.values(F('id'))))
-        print(self.request.user.id)
-        print(queryset[1].response_exists)
-        print(queryset[1].id)
-        return queryset
+        response = Response.objects.filter(post_id=OuterRef('pk'), user_id=self.request.user.id)
+        queryset = queryset.annotate(response_exists=Count(Subquery(response.only('id'))))
+        self.filterset = PostFilter(self.request.GET, queryset)
+        return self.filterset.qs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['filterset'] = self.filterset
+        return context
 
 
 class PostCreate(CreateView):
@@ -59,13 +70,10 @@ class PostUpdate(UpdateView):
     template_name = 'billboard/post_edit.html'
 
 
-class ResponseUpdate(UpdateView):
-    form_class = ResponseForm
+class ResponseUpdate(FindResponseMixin, UpdateView):
     model = Response
+    form_class = ResponseForm
     template_name = 'billboard/post_edit.html'
-
-    def get_object(self, queryset=None):
-        return Response.objects.get(post_id=self.kwargs['pk'], user_id=self.request.user.id)
 
 
 class PostDelete(DeleteView):
@@ -74,10 +82,13 @@ class PostDelete(DeleteView):
     success_url = reverse_lazy('main_page')
 
 
-class Responser(View):
-    def get(self, request, *args, **kwargs):
-        post_id = self.kwargs['pk']
-        if Response.objects.filter(post_id=post_id, user_id=self.request.user.id).exists():
-            return HttpResponseRedirect(reverse('response_update', args=[post_id]))
-        else:
-            return HttpResponseRedirect(reverse('response_create', args=[post_id]))
+class ResponseDelete(FindResponseMixin, DeleteView):
+    model = Response
+    template_name = 'billboard/post_delete.html'
+    success_url = reverse_lazy('main_page')
+
+
+class ProfileDetail(DetailView):
+    model = User
+    template_name = 'billboard/profile.html'
+    context_object_name = 'user'

@@ -4,7 +4,14 @@
 {% block title %} Billboard {% endblock title %}
 
 {% block content %}
-    <table width="1000">
+
+    <form action="" method="get">
+       {{ filterset.form.as_p }}
+       <input type="submit" value="Find" />
+   </form>
+
+    <hr>
+    <table width="1500">
     <tr>
         <td>Title</td>
         <td>Content</td>
@@ -20,7 +27,12 @@
             <td>{{ post.category }}</td>
             <td>{{ post.time|date:"d-m-Y" }}</td>
             <td>{{ post.author }}</td>
-            <td><a href="{% url 'response' post.id %}">Add</a></td>
+            {% if post.response_exists %}
+                <td><a href="{% url 'response_update' post.id %}">Update</a>
+                    <a href="{% url 'response_delete' post.id %}">Delete</a></td>
+            {% else %}
+                <td><a href="{% url 'response_create' post.id %}">Add</a></td>
+            {% endif %}
         </tr>
     {% endfor %}
     </table>

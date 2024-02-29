@@ -1,11 +1,13 @@
 {% extends 'default.html' %}
 
 {% block content %}
-<h1>Post/Response edit</h1>
-<hr>
-<form action="" method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <input type="submit" value="Save" />
-</form>
+
+    <h1>Post/Response edit</h1>
+    <hr>
+    <form action="" method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input type="submit" value="Save" />
+    </form>
+
 {% endblock content %}
