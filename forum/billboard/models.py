@@ -48,6 +48,7 @@ class Response(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
     content = models.TextField(max_length=100)
     status = models.BooleanField(default=False)
+    time = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         constraints = [

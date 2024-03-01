@@ -85,3 +85,15 @@ class ResponseDelete(FindResponseMixin, DeleteView):
     model = Response
     template_name = 'billboard/post_delete.html'
     success_url = reverse_lazy('main_page')
+
+
+class ResponseUserPostsList(ListView):
+    model = Response
+    ordering = '-time'
+    template_name = 'billboard/responses.html'
+    context_object_name = 'responses'
+    paginate_by = 10
+
+    def get_queryset(self):
+        responses = Response.objects.filter(post__author=self.request.user)
+        return responses

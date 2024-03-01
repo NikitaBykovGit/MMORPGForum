@@ -1,0 +1,26 @@
+{% extends 'default.html' %}
+
+{% block content %}
+
+    <table width="1500">
+    <tr>
+        <td>Post</td>
+        <td>Content</td>
+        <td>User</td>
+        <td>Time</td>
+        <td>Status</td>
+    </tr>
+    {% for response in responses %}
+        <tr>
+            <td>{{ response.post.title }}</td>
+            <td>{{ response.content }}</td>
+            <td>{{ response.user }}</td>
+            <td>{{ response.time|date:"d-m-Y" }}</td>
+            <td>{{ response.status }}</td>
+        </tr>
+    {% endfor %}
+    </table>
+
+    {% include "billboard/pagination.html" %}
+
+{% endblock content %}
