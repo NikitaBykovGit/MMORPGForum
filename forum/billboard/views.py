@@ -1,6 +1,5 @@
 from abc import ABC
 
-from django.contrib.auth.models import User
 from django.db.models import OuterRef, Subquery, Count
 from django.urls import reverse_lazy
 from django.views.generic import DetailView, ListView, CreateView, UpdateView, DeleteView
@@ -86,9 +85,3 @@ class ResponseDelete(FindResponseMixin, DeleteView):
     model = Response
     template_name = 'billboard/post_delete.html'
     success_url = reverse_lazy('main_page')
-
-
-class ProfileDetail(DetailView):
-    model = User
-    template_name = 'billboard/profile.html'
-    context_object_name = 'user'

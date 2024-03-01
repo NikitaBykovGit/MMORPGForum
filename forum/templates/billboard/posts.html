@@ -27,11 +27,15 @@
             <td>{{ post.category }}</td>
             <td>{{ post.time|date:"d-m-Y" }}</td>
             <td>{{ post.author }}</td>
-            {% if post.response_exists %}
-                <td><a href="{% url 'response_update' post.id %}">Update</a>
-                    <a href="{% url 'response_delete' post.id %}">Delete</a></td>
+            {% if post.author != request.user %}
+                {% if post.response_exists %}
+                    <td><a href="{% url 'response_update' post.id %}">Update</a>
+                        <a href="{% url 'response_delete' post.id %}">Delete</a></td>
+                {% else %}
+                    <td><a href="{% url 'response_create' post.id %}">Add</a></td>
+                {% endif %}
             {% else %}
-                <td><a href="{% url 'response_create' post.id %}">Add</a></td>
+                <td>It is your post</td>
             {% endif %}
         </tr>
     {% endfor %}

@@ -1,8 +1,11 @@
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.urls import reverse
 
 from ckeditor_uploader.fields import RichTextUploadingField
+
+User = get_user_model()
 
 
 class Category(models.Model):
@@ -48,8 +51,13 @@ class Response(models.Model):
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=['user', 'post'], name='unique response to a post from each user')
+            models.UniqueConstraint(fields=['user', 'post'], name='unique response to a post from each user'),
         ]
 
     def get_absolute_url(self):
         return reverse('main_page')
+
+    def save(self, *args, **kwargs):
+        if self.user == self.post.author:
+            raise ValidationError('You can not response to your post')
+        super().save(*args, **kwargs)
