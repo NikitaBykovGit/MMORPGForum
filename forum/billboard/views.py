@@ -1,7 +1,9 @@
 from abc import ABC
 
 from django.db.models import OuterRef, Subquery, Count
+from django.http import HttpResponseRedirect
 from django.urls import reverse_lazy
+from django.views import View
 from django.views.generic import DetailView, ListView, CreateView, UpdateView, DeleteView
 
 from .models import Post, Response
@@ -11,7 +13,10 @@ from .filters import PostFilter
 
 class FindResponseMixin(ABC):
     def get_object(self, queryset=None):
-        return Response.objects.get(post_id=self.kwargs['pk'], user_id=self.request.user.id)
+        user_id = self.request.user.id
+        print(self.kwargs['pk'])
+        print(self.request.user.id)
+        return Response.objects.get(post_id=self.kwargs['pk'], user_id=user_id)
 
 
 class PostDetail(DetailView):
@@ -36,6 +41,8 @@ class PostList(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        unwatched_responses = Response.objects.filter(post__author=self.request.user, status=False)
+        context['unwatched_responses_count'] = unwatched_responses.count()
         context['filterset'] = self.filterset
         return context
 
@@ -85,6 +92,18 @@ class ResponseDelete(FindResponseMixin, DeleteView):
     model = Response
     template_name = 'billboard/post_delete.html'
     success_url = reverse_lazy('main_page')
+
+
+class ResponseDeny(DeleteView):
+    model = Response
+    template_name = 'billboard/post_delete.html'
+    success_url = reverse_lazy('response_list')
+
+
+class ResponseAccept(View):
+    def get(self, *args, **kwargs):
+        Response.objects.filter(pk=self.kwargs['pk']).update(status=True)
+        return HttpResponseRedirect(reverse_lazy('response_list'))
 
 
 class ResponseUserPostsList(ListView):

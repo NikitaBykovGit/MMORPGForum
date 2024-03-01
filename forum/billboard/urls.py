@@ -1,6 +1,6 @@
 from django.urls import path
 from .views import (PostList, PostDetail, PostCreate, PostUpdate, PostDelete, ResponseCreate, ResponseUpdate,
-                    ResponseDelete, ResponseUserPostsList)
+                    ResponseDelete, ResponseDeny, ResponseAccept, ResponseUserPostsList)
 urlpatterns = [
     path('', PostList.as_view(), name='main_page'),
     path('create/', PostCreate.as_view(), name='post_create'),
@@ -11,4 +11,6 @@ urlpatterns = [
     path('<int:pk>/response/update', ResponseUpdate.as_view(), name='response_update'),
     path('<int:pk>/response/delete', ResponseDelete.as_view(), name='response_delete'),
     path('responses/', ResponseUserPostsList.as_view(), name='response_list'),
+    path('responses/<int:pk>/deny', ResponseDeny.as_view(), name='response_deny'),
+    path('responses/<int:pk>/accept', ResponseAccept.as_view(), name='response_accept'),
 ]

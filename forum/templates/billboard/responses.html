@@ -9,14 +9,25 @@
         <td>User</td>
         <td>Time</td>
         <td>Status</td>
+        <td>Action</td>
     </tr>
     {% for response in responses %}
         <tr>
-            <td>{{ response.post.title }}</td>
+           <td><a href="{% url 'post_detail' response.post.id %}">{{ response.post.title }}</a></td>
             <td>{{ response.content }}</td>
             <td>{{ response.user }}</td>
             <td>{{ response.time|date:"d-m-Y" }}</td>
-            <td>{{ response.status }}</td>
+            <td>
+                {% if response.status %}
+                    <h4 style="color:green">Accepted</h4>
+                {% else %}
+                    <h4 style="color:red">Not Accepted</h4>
+                {% endif %}
+            </td>
+            {% if response.status is False %}
+                <td><a href="{% url 'response_accept' response.id %}">Accept</a>
+                    <a href="{% url 'response_deny' response.id %}">Deny</a></td>
+            {% endif %}
         </tr>
     {% endfor %}
     </table>
