@@ -42,6 +42,13 @@ class Post(models.Model):
     def get_absolute_url(self):
         return reverse('post_detail', args=[str(self.id)])
 
+    def preview(self):
+        position_tag = self.content[1:-1].find('<')
+        if position_tag == -1:
+            return self.content[:20] + '...'
+        else:
+            return self.content[3:position_tag] + '...'
+
 
 class Response(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)

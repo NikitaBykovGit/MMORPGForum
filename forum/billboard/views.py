@@ -1,5 +1,6 @@
 from abc import ABC
 
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import OuterRef, Subquery, Count
 from django.http import HttpResponseRedirect
 from django.urls import reverse_lazy
@@ -8,15 +9,12 @@ from django.views.generic import DetailView, ListView, CreateView, UpdateView, D
 
 from .models import Post, Response
 from .forms import PostForm, ResponseForm
-from .filters import PostFilter
+from .filters import PostFilter, ResponseFilter
 
 
 class FindResponseMixin(ABC):
     def get_object(self, queryset=None):
-        user_id = self.request.user.id
-        print(self.kwargs['pk'])
-        print(self.request.user.id)
-        return Response.objects.get(post_id=self.kwargs['pk'], user_id=user_id)
+        return Response.objects.get(post_id=self.kwargs['pk'], user_id=self.request.user.id)
 
 
 class PostDetail(DetailView):
@@ -41,13 +39,11 @@ class PostList(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        unwatched_responses = Response.objects.filter(post__author=self.request.user, status=False)
-        context['unwatched_responses_count'] = unwatched_responses.count()
         context['filterset'] = self.filterset
         return context
 
 
-class PostCreate(CreateView):
+class PostCreate(LoginRequiredMixin, CreateView):
     form_class = PostForm
     model = Post
     template_name = 'billboard/post_edit.html'
@@ -58,7 +54,7 @@ class PostCreate(CreateView):
         return super().form_valid(form)
 
 
-class ResponseCreate(CreateView):
+class ResponseCreate(LoginRequiredMixin, CreateView):
     form_class = ResponseForm
     model = Response
     template_name = 'billboard/post_edit.html'
@@ -70,43 +66,43 @@ class ResponseCreate(CreateView):
         return super().form_valid(form)
 
 
-class PostUpdate(UpdateView):
+class PostUpdate(LoginRequiredMixin, UpdateView):
     form_class = PostForm
     model = Post
     template_name = 'billboard/post_edit.html'
 
 
-class ResponseUpdate(FindResponseMixin, UpdateView):
+class ResponseUpdate(FindResponseMixin, LoginRequiredMixin, UpdateView):
     model = Response
     form_class = ResponseForm
     template_name = 'billboard/post_edit.html'
 
 
-class PostDelete(DeleteView):
+class PostDelete(LoginRequiredMixin, DeleteView):
     model = Post
     template_name = 'billboard/post_delete.html'
     success_url = reverse_lazy('main_page')
 
 
-class ResponseDelete(FindResponseMixin, DeleteView):
+class ResponseDelete(FindResponseMixin, LoginRequiredMixin, DeleteView):
     model = Response
     template_name = 'billboard/post_delete.html'
     success_url = reverse_lazy('main_page')
 
 
-class ResponseDeny(DeleteView):
+class ResponseDeny(LoginRequiredMixin, DeleteView):
     model = Response
     template_name = 'billboard/post_delete.html'
     success_url = reverse_lazy('response_list')
 
 
-class ResponseAccept(View):
+class ResponseAccept(LoginRequiredMixin, View):
     def get(self, *args, **kwargs):
         Response.objects.filter(pk=self.kwargs['pk']).update(status=True)
         return HttpResponseRedirect(reverse_lazy('response_list'))
 
 
-class ResponseUserPostsList(ListView):
+class ResponseUserPostsList(LoginRequiredMixin, ListView):
     model = Response
     ordering = '-time'
     template_name = 'billboard/responses.html'
@@ -114,5 +110,11 @@ class ResponseUserPostsList(ListView):
     paginate_by = 10
 
     def get_queryset(self):
-        responses = Response.objects.filter(post__author=self.request.user)
-        return responses
+        queryset = super().get_queryset().filter(post__author=self.request.user)
+        self.filterset = ResponseFilter(self.request.GET, request=self.request, queryset=queryset)
+        return self.filterset.qs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['filterset'] = self.filterset
+        return context

@@ -8,6 +8,6 @@
     Date of registarion: {{ user.date_joined|date:"d-m-Y"  }} <br>
     Email: {{ user.email }} <br>
     <a href="{% url 'profile_update' user.id %}">Update</a> <br>
-    <a href="/accounts/logout">Logout</a>
+    <a href="{% url 'account_logout' %}">Logout</a>
 
 {% endblock content %}
