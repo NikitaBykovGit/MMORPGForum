@@ -1,13 +1,18 @@
 from abc import ABC
 
+from django.conf import settings
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import OuterRef, Subquery, Count
+from django.core.mail import send_mail
+from django.db.models import OuterRef, Subquery, Count, Exists
 from django.http import HttpResponseRedirect, HttpResponseForbidden
+from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.views import View
+from django.views.decorators.csrf import csrf_protect
 from django.views.generic import DetailView, ListView, CreateView, UpdateView, DeleteView
 
-from .models import Post, Response
+from .models import Post, Response, Category, Subscription
 from .forms import PostForm, ResponseForm
 from .filters import PostFilter, ResponseFilter
 
@@ -106,7 +111,14 @@ class ResponseDeny(LoginRequiredMixin, DeleteView):
 
 class ResponseAccept(LoginRequiredMixin, View):
     def get(self, *args, **kwargs):
-        Response.objects.filter(pk=self.kwargs['pk']).update(status=True)
+        response = Response.objects.filter(pk=self.kwargs['pk'])
+        response.update(status=True)
+        send_mail(
+            subject=f'Your response accepted',
+            message=f'Your response to post {settings.SITE_URL}{response[0].post.get_absolute_url()} has been accepted',
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[response[0].author.email]
+        )
         return HttpResponseRedirect(reverse_lazy('response_list'))
 
 
@@ -126,3 +138,34 @@ class ResponseUserPostsList(LoginRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
         context['filterset'] = self.filterset
         return context
+
+
+@login_required
+@csrf_protect
+def subscriptions(request):
+    if request.method == 'POST':
+        category_id = request.POST.get('category_id')
+        category = Category.objects.get(id=category_id)
+        action = request.POST.get('action')
+
+        if action == 'subscribe':
+            Subscription.objects.create(user=request.user, category=category)
+        elif action == 'unsubscribe':
+            Subscription.objects.filter(
+                user=request.user,
+                category=category,
+            ).delete()
+
+    categories_with_subscriptions = Category.objects.annotate(
+        user_subscribed=Exists(
+            Subscription.objects.filter(
+                user=request.user,
+                category=OuterRef('pk'),
+            )
+        )
+    ).order_by('name')
+    return render(
+        request,
+        'billboard/subscriptions.html',
+        {'categories': categories_with_subscriptions},
+    )

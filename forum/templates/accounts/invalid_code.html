@@ -1,0 +1,13 @@
+{% extends 'default.html' %}
+
+{% block content %}
+
+    <h1>Your account is not active</h1>
+    <h3 style="color:red">Code is incorrect. Please input it here again:</h3>
+    <form action="{% url 'confirm_user' %}" method="post">
+        {% csrf_token %}
+        <input class="text" type="text" name="code">
+        <input type="submit" value="Send" />
+    </form>
+
+{% endblock content %}

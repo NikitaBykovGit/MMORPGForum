@@ -1,0 +1,13 @@
+{% extends 'default.html' %}
+
+{% block content %}
+
+    <h1>Your account is not active</h1>
+    <h3>Activation code has been sent to your email. Please input it here:</h3>
+    <form action="{% url 'confirm_user' %}" method="post">
+        {% csrf_token %}
+        <input class="text" type="text" name="code">
+        <input type="submit" value="Send" />
+    </form>
+
+{% endblock content %}

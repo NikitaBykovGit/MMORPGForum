@@ -69,3 +69,16 @@ class Response(models.Model):
         if self.author == self.post.author:
             raise ValidationError('You can not response to your post')
         super().save(*args, **kwargs)
+
+
+class Subscription(models.Model):
+    user = models.ForeignKey(
+        to=User,
+        on_delete=models.CASCADE,
+        related_name='subscriptions',
+    )
+    category = models.ForeignKey(
+        to='Category',
+        on_delete=models.CASCADE,
+        related_name='subscriptions',
+    )
