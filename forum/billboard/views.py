@@ -30,6 +30,14 @@ class AuthorRequiredMixin(ABC):
         return super().dispatch(request, *args, **kwargs)
 
 
+class AcceptedResponseForbidMixin(ABC):
+    def get(self, request, *args, **kwargs):
+        if Response.objects.get(post_id=kwargs['pk'], author_id=self.request.user).status:
+            return HttpResponseRedirect(reverse_lazy('main_page'))
+        else:
+            return super().get(self, request, *args, **kwargs)
+
+
 class PostDetail(DetailView):
     model = Post
     template_name = 'billboard/post.html'
@@ -92,6 +100,12 @@ class ResponseCreate(LoginRequiredMixin, CreateView):
         response.author = self.request.user
         return super().form_valid(form)
 
+    def get(self, request, *args, **kwargs):
+        if Response.objects.filter(post_id=kwargs['pk'], author_id=self.request.user).exists():
+            return HttpResponseRedirect(reverse_lazy('main_page'))
+        else:
+            return super().get(self, request, *args, **kwargs)
+
 
 class PostUpdate(AuthorRequiredMixin, UpdateView):
     form_class = PostForm
@@ -106,7 +120,7 @@ class PostUpdate(AuthorRequiredMixin, UpdateView):
         return context
 
 
-class ResponseUpdate(FindResponseMixin, AuthorRequiredMixin, UpdateView):
+class ResponseUpdate(AcceptedResponseForbidMixin, FindResponseMixin, AuthorRequiredMixin, UpdateView):
     model = Response
     form_class = ResponseForm
     template_name = 'billboard/post_edit.html'
@@ -132,7 +146,7 @@ class PostDelete(AuthorRequiredMixin, DeleteView):
         return context
 
 
-class ResponseDelete(FindResponseMixin, AuthorRequiredMixin, DeleteView):
+class ResponseDelete(AcceptedResponseForbidMixin, FindResponseMixin, AuthorRequiredMixin, DeleteView):
     model = Response
     template_name = 'billboard/post_delete.html'
     success_url = reverse_lazy('main_page')
