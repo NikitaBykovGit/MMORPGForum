@@ -4,6 +4,7 @@
 
 {% block content %}
     {% for category in categories  %}
+
         <p>
             {{ category }}
             <form method="post">
@@ -11,13 +12,14 @@
                 <input type="hidden" name="category_id" value="{{ category.id }}" />
 
                 {% if category.user_subscribed %}
-                    <button disabled>Подписаться</button>
-                    <button name="action" value="unsubscribe">Subscribe </button>
+                    <button disabled>Subscribe</button>
+                    <button name="action" value="unsubscribe">Unsubscribe </button>
                 {% else %}
-                    <button name="action" value="subscribe">Unsubscribe</button>
-                    <button disabled>Отписаться</button>
+                    <button name="action" value="subscribe">Subscribe</button>
+                    <button disabled>Unsubscribe</button>
                 {% endif %}
             </form>
         </p>
+
     {% endfor %}
 {% endblock content %}

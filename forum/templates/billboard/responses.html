@@ -21,7 +21,7 @@
         <tr>
            <td><a href="{% url 'post_detail' response.post.id %}">{{ response.post.title }}</a></td>
             <td>{{ response.content }}</td>
-            <td>{{ response.user }}</td>
+            <td>{{ response.author }}</td>
             <td>{{ response.time|date:"d-m-Y" }}</td>
             <td>
                 {% if response.status %}

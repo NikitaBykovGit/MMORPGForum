@@ -31,7 +31,8 @@ class ConfirmUser(UpdateView):
         if 'code' in request.POST:
             code = Code.objects.filter(code=request.POST['code'])
             if code.exists():
-                User.objects.filter(id=code[0].user.id).update(is_active=True)
+                user = User.objects.filter(id=code[0].user.id)
+                user.update(is_active=True)
                 code.delete()
             else:
                 return render(self.request, 'accounts/invalid_code.html')

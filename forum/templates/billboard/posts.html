@@ -29,8 +29,12 @@
             <td>{{ post.author }}</td>
             {% if post.author != request.user %}
                 {% if post.response_exists %}
-                    <td><a href="{% url 'response_update' post.id %}">Update</a>
-                        <a href="{% url 'response_delete' post.id %}">Delete</a></td>
+                    {% if post.response_accepted %}
+                        <td><h4 style="color:green">Accepted</h4></td>
+                    {% else %}
+                        <td><a href="{% url 'response_update' post.id %}">Update</a>
+                            <a href="{% url 'response_delete' post.id %}">Delete</a></td>
+                    {% endif %}
                 {% else %}
                     <td><a href="{% url 'response_create' post.id %}">Add</a></td>
                 {% endif %}

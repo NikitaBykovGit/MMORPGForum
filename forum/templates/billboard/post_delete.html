@@ -1,13 +1,18 @@
 {% extends 'default.html' %}
 
+{% block title %}{{ title }} delete{% endblock title %}
+
 {% block content %}
 
-    <h1>Delete</h1>
+    <h1>{{ title }}</h1>
     <hr>
     <form action="" method="post">
         {% csrf_token %}
-        <p>Delete "{{ object.name }}"?</p>
-        <input type="submit" value="Delete" />
+        <p>"{{ text }}"</p>
+        <input type="submit" value="Yes" />
+    </form>
+    <form action="{% url 'main_page' %}" method="get">
+        <input type="submit" value="No" />
     </form>
 
 {% endblock content %}

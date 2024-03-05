@@ -27,7 +27,6 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'accounts',
     'billboard',
-    'django_apscheduler',
 ]
 
 MIDDLEWARE = [
@@ -111,63 +110,7 @@ ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_UNIQUE_EMAIL = True
 ACCOUNT_USERNAME_REQUIRED = True
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
-ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
-ACCOUNT_CONFIRM_EMAIL_ON_GET = True
+ACCOUNT_EMAIL_VERIFICATION = None
 ACCOUNT_FORMS = {'signup': 'accounts.forms.CommonSignupForm'}
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-
-CKEDITOR_CONFIGS = {
-    'default': {
-        'skin': 'moono',
-        'toolbar_Basic': [
-            ['Source', '-', 'Bold', 'Italic']
-        ],
-        'toolbar_YourCustomToolbarConfig': [
-            {'name': 'document', 'items': ['Source', '-', 'Save', 'NewPage', 'Preview', 'Print', '-', 'Templates']},
-            {'name': 'clipboard', 'items': ['Cut', 'Copy', 'Paste', 'PasteText', 'PasteFromWord', '-', 'Undo', 'Redo']},
-            {'name': 'editing', 'items': ['Find', 'Replace', '-', 'SelectAll']},
-            {'name': 'forms',
-             'items': ['Form', 'Checkbox', 'Radio', 'TextField', 'Textarea', 'Select', 'Button', 'ImageButton',
-                       'HiddenField']},
-            '/',
-            {'name': 'basicstyles',
-             'items': ['Bold', 'Italic', 'Underline', 'Strike', 'Subscript', 'Superscript', '-', 'RemoveFormat']},
-            {'name': 'paragraph',
-             'items': ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-', 'Blockquote', 'CreateDiv', '-',
-                       'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock', '-', 'BidiLtr', 'BidiRtl',
-                       'Language']},
-            {'name': 'links', 'items': ['Link', 'Unlink', 'Anchor']},
-            {'name': 'insert',
-             'items': ['Image', 'Flash', 'Table', 'HorizontalRule', 'Smiley', 'SpecialChar', 'PageBreak', 'Iframe']},
-            '/',
-            {'name': 'styles', 'items': ['Styles', 'Format', 'Font', 'FontSize']},
-            {'name': 'colors', 'items': ['TextColor', 'BGColor']},
-            {'name': 'tools', 'items': ['Maximize', 'ShowBlocks']},
-            {'name': 'about', 'items': ['About']},
-            '/',
-            {'name': 'yourcustomtools', 'items': [
-                'Preview',
-                'Maximize',
-                'Youtube',
-            ]},
-        ],
-        'toolbar': 'YourCustomToolbarConfig',
-        'tabSpaces': 4,
-        'extraPlugins': ','.join([
-            'uploadimage',
-            'div',
-            'autolink',
-            'autoembed',
-            'embedsemantic',
-            'autogrow',
-            'widget',
-            'lineutils',
-            'clipboard',
-            'dialog',
-            'dialogui',
-            'elementspath',
-            'youtube'
-        ]),
-    }
-}

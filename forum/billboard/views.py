@@ -4,7 +4,7 @@ from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.mail import send_mail
-from django.db.models import OuterRef, Subquery, Count, Exists
+from django.db.models import OuterRef, Subquery, Count, Exists, F, Value, Sum
 from django.http import HttpResponseRedirect, HttpResponseForbidden
 from django.shortcuts import render
 from django.urls import reverse_lazy
@@ -45,8 +45,10 @@ class PostList(ListView):
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        response = Response.objects.filter(post_id=OuterRef('pk'), author_id=self.request.user.id)
-        queryset = queryset.annotate(response_exists=Count(Subquery(response.only('id'))))
+        user = self.request.user.id
+        responses = Response.objects.filter(post_id=OuterRef('pk'), author_id=user)
+        queryset = queryset.annotate(response_exists=Exists(responses))
+        queryset = queryset.annotate(response_accepted=Sum(responses.values('status')))
         self.filterset = PostFilter(self.request.GET, queryset)
         return self.filterset.qs
 
@@ -66,11 +68,23 @@ class PostCreate(LoginRequiredMixin, CreateView):
         post.author = self.request.user
         return super().form_valid(form)
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        print(self.kwargs)
+        context['title'] = 'Post'
+        return context
+
 
 class ResponseCreate(LoginRequiredMixin, CreateView):
     form_class = ResponseForm
     model = Response
     template_name = 'billboard/post_edit.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        print(self.kwargs)
+        context['title'] = 'Response'
+        return context
 
     def form_valid(self, form):
         response = form.save(commit=False)
@@ -84,11 +98,25 @@ class PostUpdate(AuthorRequiredMixin, UpdateView):
     model = Post
     template_name = 'billboard/post_edit.html'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        print(self.kwargs)
+        context['title'] = 'Post edit'
+        context['text'] = f'Post {Post.objects.get(id=self.kwargs["pk"]).title} edit'
+        return context
+
 
 class ResponseUpdate(FindResponseMixin, AuthorRequiredMixin, UpdateView):
     model = Response
     form_class = ResponseForm
     template_name = 'billboard/post_edit.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        print(self.kwargs)
+        context['title'] = 'Response edit'
+        context['text'] = f'Response to post {Post.objects.get(id=self.kwargs["pk"]).title} edit'
+        return context
 
 
 class PostDelete(AuthorRequiredMixin, DeleteView):
@@ -96,11 +124,25 @@ class PostDelete(AuthorRequiredMixin, DeleteView):
     template_name = 'billboard/post_delete.html'
     success_url = reverse_lazy('main_page')
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        print(self.kwargs)
+        context['title'] = 'Post'
+        context['text'] = f'Do you want to delete your post {Post.objects.get(id=self.kwargs["pk"]).title}'
+        return context
+
 
 class ResponseDelete(FindResponseMixin, AuthorRequiredMixin, DeleteView):
     model = Response
     template_name = 'billboard/post_delete.html'
     success_url = reverse_lazy('main_page')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        print(self.kwargs)
+        context['title'] = 'Response'
+        context['text'] = f'Do you want to delete your response to post {Post.objects.get(id=self.kwargs["pk"]).title}'
+        return context
 
 
 class ResponseDeny(LoginRequiredMixin, DeleteView):
@@ -117,7 +159,7 @@ class ResponseAccept(LoginRequiredMixin, View):
             subject=f'Your response accepted',
             message=f'Your response to post {settings.SITE_URL}{response[0].post.get_absolute_url()} has been accepted',
             from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[response[0].author.email]
+            recipient_list=[response.first().author.email]
         )
         return HttpResponseRedirect(reverse_lazy('response_list'))
 
